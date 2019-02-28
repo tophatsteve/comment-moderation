@@ -39,7 +39,7 @@ namespace CommentModeration.Services
             var appSecret = AzureHelpers.GetSetting("DisqusAppSecret");
             var unixStartTime = (int)(start.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
 
-            return $"{apiBaseUrl}/posts/list.json?start={unixStartTime}&forum={forum}" 
+            return $"{apiBaseUrl}/posts/list.json?start={unixStartTime}&forum={forum}&include=unapproved" 
                    + $"&access_token={accessToken}&api_key={apiKey}&api_secret={appSecret}";
         }
     }

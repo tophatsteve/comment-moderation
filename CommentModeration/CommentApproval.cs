@@ -5,10 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace CommentModeration
 {
-    public static class CommentUnapproval
+    public static class CommentApproval
     {
-        [FunctionName("CommentUnapproval")]
-        public static void Run([QueueTrigger("comments-for-removal", Connection = "QueueStorage")]string myQueueItem, ILogger log)
+        [FunctionName("CommentApproval")]
+        public static void Run([QueueTrigger("comments-for-approval", Connection = "QueueStorage")]string myQueueItem, ILogger log)
         {
             log.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
         }

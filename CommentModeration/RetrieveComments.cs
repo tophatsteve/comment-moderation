@@ -11,7 +11,7 @@ namespace CommentModeration
     public static class RetrieveComments
     {
         [FunctionName("RetrieveComments")]
-        public static async Task Run([TimerTrigger("0 0 * * * *")]TimerInfo myTimer,
+        public static async Task Run([TimerTrigger(("%RetrieveComments:TimerSchedule%"))]TimerInfo myTimer,
             [Queue("comments-for-moderation", Connection = "QueueStorage")]IAsyncCollector<DisqusComment> output,
             ILogger log)
         {
