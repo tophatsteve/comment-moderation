@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using CommentModeration.Helpers;
 using CommentModeration.Models;
 using Newtonsoft.Json;
@@ -30,6 +29,47 @@ namespace CommentModeration.Services
             return comments;
         }
 
+        public void ApproveComment(string id)
+        {
+            var values = BuildApprovalValues(id);
+            var url = BuildApproveCommentUrl();
+
+            var content = new FormUrlEncodedContent(values);
+
+            using (var client = new HttpClient())
+            {
+                var response = client.PostAsync(url, content).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    var parsed = response.Content.ReadAsStringAsync().Result;
+                }
+            }
+        }
+
+        private Dictionary<string, string> BuildApprovalValues(string id)
+        {
+            var accessToken = AzureHelpers.GetSetting("DisqusAccessToken");
+            var apiKey = AzureHelpers.GetSetting("DisqusApiKey");
+            var appSecret = AzureHelpers.GetSetting("DisqusAppSecret");
+
+            var values = new Dictionary<string, string>
+            {
+                { "access_token", accessToken },
+                { "api_key", apiKey },
+                { "api_secret", appSecret },
+                { "post", id }
+            };
+
+            return values;
+        }
+
+        private string BuildApproveCommentUrl()
+        {
+            var apiBaseUrl = AzureHelpers.GetSetting("DisqusApiBaseUrl");
+
+            return $"{apiBaseUrl}/posts/approve.json";
+        }
+
         private string BuildRetrieveCommentsUrl(DateTime start)
         {
             var apiBaseUrl = AzureHelpers.GetSetting("DisqusApiBaseUrl");
@@ -39,8 +79,11 @@ namespace CommentModeration.Services
             var appSecret = AzureHelpers.GetSetting("DisqusAppSecret");
             var unixStartTime = (int)(start.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
 
-            return $"{apiBaseUrl}/posts/list.json?start={unixStartTime}&forum={forum}&include=unapproved" 
+            return $"{apiBaseUrl}/posts/list.json?start={unixStartTime}&forum={forum}&include=unapproved"
                    + $"&access_token={accessToken}&api_key={apiKey}&api_secret={appSecret}";
         }
     }
 }
+
+
+

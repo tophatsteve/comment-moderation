@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
+using CommentModeration.Helpers;
 using CommentModeration.Models;
+using CommentModeration.Services;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 
 namespace CommentModeration
@@ -10,22 +10,19 @@ namespace CommentModeration
     public static class ModerateComments
     {
         [FunctionName("ModerateComments")]
-        public static void Run([QueueTrigger("comments-for-moderation", Connection = "QueueStorage")]DisqusComment comment, ILogger log)
+        public static async Task Run([QueueTrigger("comments-for-moderation", Connection = "QueueStorage")]DisqusComment comment,
+            [Queue("comments-for-approval", Connection = "QueueStorage")]IAsyncCollector<string> output,
+            ILogger log)
         {
-            log.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
+            var textAnalysisService = new TextAnalysisService();
+            var score = textAnalysisService.GetSentimentAnalysis(comment.Raw_Message);
 
-            var request = new SentimentAnalysisRequest
+            var threshold = double.Parse(AzureHelpers.GetSetting("CommentScoreThreshold"));
+
+            if (score > threshold)
             {
-                Documents = new List<SentimentAnalysisRequestItem>
-                {
-                    new SentimentAnalysisRequestItem
-                    {
-                        Id = "1",
-                        Language = "en",
-                        Text = comment.Raw_Message
-                    }
-                }
-            };
+                await output.AddAsync(comment.Id);
+            }
         }
     }
 }

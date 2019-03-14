@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using CommentModeration.Models;
 using CommentModeration.Services;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 
 namespace CommentModeration
@@ -23,8 +22,6 @@ namespace CommentModeration
             {
                 await output.AddAsync(comment);
             }
-
-            log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
         }
     }
 }
